@@ -17,9 +17,12 @@ export default function ContactForm() {
     email: "",
     servicio: "",
     mensaje: "",
+    honeypot: "", // campo trampa para bots, siempre vacío en humanos
   });
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [enviado, setEnviado] = useState(false);
+  const [cargando, setCargando] = useState(false);
+  const [errorServidor, setErrorServidor] = useState("");
 
   // Lee el parámetro ?servicio= de la URL y lo rellena automáticamente
   useEffect(() => {
@@ -30,7 +33,7 @@ export default function ContactForm() {
     }
   }, []);
 
-  const validar = () => {
+  const validarCliente = () => {
     const nuevosErrores: Record<string, string> = {};
     if (!form.nombre.trim()) nuevosErrores.nombre = "El nombre es obligatorio.";
     if (!form.email.trim()) {
@@ -39,23 +42,58 @@ export default function ContactForm() {
       nuevosErrores.email = "Ingresa un email válido.";
     }
     if (!form.servicio) nuevosErrores.servicio = "Selecciona un servicio.";
-    if (!form.mensaje.trim()) nuevosErrores.mensaje = "El mensaje es obligatorio.";
+    if (!form.mensaje.trim()) {
+      nuevosErrores.mensaje = "El mensaje es obligatorio.";
+    } else if (form.mensaje.trim().length < 10) {
+      nuevosErrores.mensaje = "El mensaje debe tener al menos 10 caracteres.";
+    }
     return nuevosErrores;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrores({ ...errores, [e.target.name]: "" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nuevosErrores = validar();
+    setErrorServidor("");
+
+    // Validación del cliente primero
+    const nuevosErrores = validarCliente();
     if (Object.keys(nuevosErrores).length > 0) {
       setErrores(nuevosErrores);
       return;
     }
-    setEnviado(true);
+
+    setCargando(true);
+
+    try {
+      const res = await fetch("/api/contacto", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.errores) {
+          setErrores(data.errores);
+        } else {
+          setErrorServidor("Hubo un error al enviar. Intenta nuevamente.");
+        }
+        return;
+      }
+
+      setEnviado(true);
+    } catch {
+      setErrorServidor("No se pudo conectar con el servidor.");
+    } finally {
+      setCargando(false);
+    }
   };
 
   if (enviado) {
@@ -69,6 +107,17 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+
+      {/* Campo honeypot — oculto para humanos, los bots lo rellenan */}
+      <input
+        type="text"
+        name="honeypot"
+        value={form.honeypot}
+        onChange={handleChange}
+        aria-hidden="true"
+        tabIndex={-1}
+        style={{ display: "none" }}
+      />
 
       <div>
         <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
@@ -137,11 +186,16 @@ export default function ContactForm() {
         {errores.mensaje && <p className="text-red-500 text-xs mt-1">{errores.mensaje}</p>}
       </div>
 
+      {errorServidor && (
+        <p className="text-red-500 text-sm text-center">{errorServidor}</p>
+      )}
+
       <button
         type="submit"
-        className="bg-[#C8102E] text-white font-semibold py-3 rounded-full hover:bg-red-700 transition-colors"
+        disabled={cargando}
+        className="bg-[#C8102E] text-white font-semibold py-3 rounded-full hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Enviar mensaje
+        {cargando ? "Enviando..." : "Enviar mensaje"}
       </button>
     </form>
   );
