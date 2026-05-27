@@ -130,7 +130,7 @@ export default function ContactForm() {
           value={form.nombre}
           onChange={handleChange}
           placeholder="Ej: María González"
-          className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] placeholder:text-gray-500 ${errores.nombre ? "border-red-500" : "border-gray-300"}`}
+          className={`w-full border rounded-lg px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C8102E] placeholder:text-gray-500 ${errores.nombre ? "border-red-500" : "border-gray-300"}`}
         />
         {errores.nombre && <p className="text-red-500 text-xs mt-1">{errores.nombre}</p>}
       </div>
@@ -146,7 +146,7 @@ export default function ContactForm() {
           value={form.email}
           onChange={handleChange}
           placeholder="Ej: maria@correo.cl"
-          className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] placeholder:text-gray-500 ${errores.email ? "border-red-500" : "border-gray-300"}`}
+          className={`w-full border rounded-lg px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C8102E] placeholder:text-gray-500 ${errores.email ? "border-red-500" : "border-gray-300"}`}
         />
         {errores.email && <p className="text-red-500 text-xs mt-1">{errores.email}</p>}
       </div>
@@ -181,7 +181,7 @@ export default function ContactForm() {
           onChange={handleChange}
           placeholder="Cuéntanos sobre tu negocio y en qué te podemos ayudar..."
           rows={4}
-          className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] placeholder:text-gray-500 resize-none ${errores.mensaje ? "border-red-500" : "border-gray-300"}`}
+          className={`w-full border rounded-lg px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#C8102E] placeholder:text-gray-500 resize-none ${errores.mensaje ? "border-red-500" : "border-gray-300"}`}
         />
         {errores.mensaje && <p className="text-red-500 text-xs mt-1">{errores.mensaje}</p>}
       </div>
